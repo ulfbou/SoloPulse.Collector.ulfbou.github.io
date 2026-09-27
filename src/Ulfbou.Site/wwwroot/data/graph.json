@@ -1,15 +1,20 @@
 {
   "schemaVersion": "1",
-  "generatedAt": "2026-09-20T23:01:38.7561184Z",
+  "generatedAt": "2026-09-27T23:01:39.9973387Z",
   "nodes": [
-    {
-      "id": "ads",
-      "label": "ads",
-      "group": "core"
-    },
     {
       "id": "ulfbou.github.io",
       "label": "ulfbou.github.io",
+      "group": "core"
+    },
+    {
+      "id": "pystd-suite",
+      "label": "pystd-suite",
+      "group": "core"
+    },
+    {
+      "id": "ads",
+      "label": "ads",
       "group": "core"
     },
     {
@@ -70,11 +75,6 @@
     {
       "id": "homebrew-tap",
       "label": "homebrew-tap",
-      "group": "core"
-    },
-    {
-      "id": "syss8.opf.clean",
-      "label": "syss8.opf.clean",
       "group": "core"
     }
   ],
