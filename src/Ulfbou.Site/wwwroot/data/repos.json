@@ -1,42 +1,66 @@
 {
   "schemaVersion": "1",
-  "generatedAt": "2026-09-27T23:01:39.9973387Z",
+  "generatedAt": "2026-10-04T23:02:00.3686373Z",
   "repos": [
+    {
+      "name": "portfolio-profiler",
+      "displayName": "Portfolio-profiler",
+      "language": "Python",
+      "momentum": 100,
+      "focusMinutes7d": 101,
+      "contextSwitchesOut": 0,
+      "lastDeepWork": "2026-10-04T20:01:50.0000000Z",
+      "returnRate": 1,
+      "openLoops": 1,
+      "summary": "Repository intelligence and evidence collection for developer portfolio analysis"
+    },
+    {
+      "name": "fold",
+      "displayName": "Fold",
+      "language": "Python",
+      "momentum": 75,
+      "focusMinutes7d": 0,
+      "contextSwitchesOut": 0,
+      "lastDeepWork": "2026-10-03T18:11:58.0000000Z",
+      "returnRate": 1,
+      "openLoops": 0,
+      "summary": ""
+    },
     {
       "name": "ulfbou.github.io",
       "displayName": "Ulfbou.Github.Io",
       "language": "C#",
-      "momentum": 100,
+      "momentum": 27,
       "focusMinutes7d": 0,
       "contextSwitchesOut": 0,
-      "lastDeepWork": "2026-09-20T23:01:45.0000000Z",
-      "returnRate": 0.94,
+      "lastDeepWork": "2026-09-27T23:01:47.0000000Z",
+      "returnRate": 0.95,
       "openLoops": 1,
-      "summary": ""
-    },
-    {
-      "name": "pystd-suite",
-      "displayName": "Pystd-suite",
-      "language": "unknown",
-      "momentum": 71,
-      "focusMinutes7d": 0,
-      "contextSwitchesOut": 0,
-      "lastDeepWork": "2026-09-26T13:19:53.0000000Z",
-      "returnRate": 1,
-      "openLoops": 0,
       "summary": ""
     },
     {
       "name": "ads",
       "displayName": "Ads",
       "language": "C#",
-      "momentum": 57,
+      "momentum": 20,
       "focusMinutes7d": 0,
       "contextSwitchesOut": 0,
       "lastDeepWork": "2026-09-08T13:02:56.0000000Z",
       "returnRate": 1,
       "openLoops": 0,
       "summary": "Accountable Decision System"
+    },
+    {
+      "name": "pystd-suite",
+      "displayName": "Pystd-suite",
+      "language": "unknown",
+      "momentum": 12,
+      "focusMinutes7d": 0,
+      "contextSwitchesOut": 0,
+      "lastDeepWork": "2026-09-26T13:19:53.0000000Z",
+      "returnRate": 1,
+      "openLoops": 0,
+      "summary": ""
     },
     {
       "name": "quizbattle",
@@ -155,30 +179,6 @@
       "contextSwitchesOut": 0,
       "lastDeepWork": "2026-05-01T06:25:34.0000000Z",
       "returnRate": 1,
-      "openLoops": 0,
-      "summary": ""
-    },
-    {
-      "name": "portfolio",
-      "displayName": "Portfolio",
-      "language": "C#",
-      "momentum": 0,
-      "focusMinutes7d": 0,
-      "contextSwitchesOut": 0,
-      "lastDeepWork": "2026-04-27T17:43:22.0000000Z",
-      "returnRate": 1,
-      "openLoops": 0,
-      "summary": ""
-    },
-    {
-      "name": "homebrew-tap",
-      "displayName": "Homebrew-tap",
-      "language": "Ruby",
-      "momentum": 0,
-      "focusMinutes7d": 0,
-      "contextSwitchesOut": 1,
-      "lastDeepWork": "2026-04-08T18:51:45.0000000Z",
-      "returnRate": 0.67,
       "openLoops": 0,
       "summary": ""
     }

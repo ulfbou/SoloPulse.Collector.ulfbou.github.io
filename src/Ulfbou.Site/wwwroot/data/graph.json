@@ -1,20 +1,30 @@
 {
   "schemaVersion": "1",
-  "generatedAt": "2026-09-27T23:01:39.9973387Z",
+  "generatedAt": "2026-10-04T23:02:00.3686373Z",
   "nodes": [
+    {
+      "id": "portfolio-profiler",
+      "label": "portfolio-profiler",
+      "group": "core"
+    },
+    {
+      "id": "fold",
+      "label": "fold",
+      "group": "core"
+    },
     {
       "id": "ulfbou.github.io",
       "label": "ulfbou.github.io",
       "group": "core"
     },
     {
-      "id": "pystd-suite",
-      "label": "pystd-suite",
+      "id": "ads",
+      "label": "ads",
       "group": "core"
     },
     {
-      "id": "ads",
-      "label": "ads",
+      "id": "pystd-suite",
+      "label": "pystd-suite",
       "group": "core"
     },
     {
@@ -66,30 +76,7 @@
       "id": "ai-playground",
       "label": "ai-playground",
       "group": "core"
-    },
-    {
-      "id": "portfolio",
-      "label": "portfolio",
-      "group": "core"
-    },
-    {
-      "id": "homebrew-tap",
-      "label": "homebrew-tap",
-      "group": "core"
     }
   ],
-  "edges": [
-    {
-      "source": "dx.cli",
-      "target": "homebrew-tap",
-      "type": "temporal",
-      "weight": 0.4
-    },
-    {
-      "source": "homebrew-tap",
-      "target": "dx.cli",
-      "type": "temporal",
-      "weight": 0.4
-    }
-  ]
+  "edges": []
 }
