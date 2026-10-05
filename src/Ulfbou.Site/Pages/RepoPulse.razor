@@ -1,13 +1,52 @@
 @page "/repopulse/"
 @inject SiteDataClient Data
+
 <PageTitle>Observatory — ulfbou.github.io</PageTitle>
+
 <h1>Observatory</h1>
 <p class="muted">A quiet place to explore repositories. Full interactivity will grow here.</p>
-@if (_repos == null) { <p>Loading…</p> } else {
+
+@if (_loading)
+{
+    <p>Loading repositories…</p>
+}
+else if (_failed)
+{
+    <p>Repository data is temporarily unavailable.</p>
+}
+else if (_repos.Count == 0)
+{
+    <p>No repositories are available for this collection.</p>
+}
+else
+{
     <div class="repo-grid">
-        @foreach (var repo in _repos) { <RepoCard Repo="repo" /> }
+        @foreach (var repo in _repos)
+        {
+            <RepoCard Repo="repo" />
+        }
     </div>
+
     <h2>Graph preview</h2>
     <ObservatoryPreview />
 }
-@code { private List<RepoModel>? _repos; protected override async Task OnInitializedAsync() { _repos = await Data.GetReposAsync(); } }
+
+@code {
+    private readonly List<RepoModel> _repos = [];
+    private bool _loading = true;
+    private bool _failed;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var repos = await Data.GetReposAsync();
+        _loading = false;
+
+        if (repos is null)
+        {
+            _failed = true;
+            return;
+        }
+
+        _repos.AddRange(repos);
+    }
+}

@@ -1,29 +1,86 @@
 @inject SiteDataClient Data
+
 <section aria-labelledby="map">
     <h2 id="map">Map of the work</h2>
     <div class="preview-card">
-        @if (_graph == null) { <p>Loading…</p> } else {
-            <svg viewBox="0 0 300 120" role="img" aria-label="Repository constellation preview">
-                @foreach (var edge in _graph.Edges) {
-                    var s = _graph.Nodes.FirstOrDefault(n => n.Id == edge.Source);
-                    var t = _graph.Nodes.FirstOrDefault(n => n.Id == edge.Target);
-                    if (s!= null && t!= null) {
-                        <line x1="@GetX(s)" y1="@GetY(s)" x2="@GetX(t)" y2="@GetY(t)" stroke="#cbd5e1" stroke-width="1" />
+        @if (_loading)
+        {
+            <p>Loading map…</p>
+        }
+        else if (_failed)
+        {
+            <p>The repository map is temporarily unavailable.</p>
+        }
+        else if (_graph!.Nodes.Count == 0)
+        {
+            <p>No repository connections are available yet.</p>
+        }
+        else
+        {
+            <svg viewBox="0 0 320 150" role="img" aria-label="Repository constellation preview">
+                @foreach (var edge in _graph.Edges)
+                {
+                    if (_points.TryGetValue(edge.Source, out var source)
+                        && _points.TryGetValue(edge.Target, out var target))
+                    {
+                        <line x1="@source.X" y1="@source.Y"
+                              x2="@target.X" y2="@target.Y"
+                              stroke="#cbd5e1" stroke-width="1" />
                     }
                 }
-                @foreach (var node in _graph.Nodes) {
-                    <circle cx="@GetX(node)" cy="@GetY(node)" r="4" fill="#0f172a" />
-                    @:<text x="@(GetX(node)+6)" y="@(GetY(node)+3)" font-size="9" fill="#334155">@node.Label</text>
+
+                @foreach (var node in _graph.Nodes)
+                {
+                    var point = _points[node.Id];
+                    <circle cx="@point.X" cy="@point.Y" r="4" fill="#0f172a" />
+                    @RenderLabel(node, point)
                 }
             </svg>
         }
+
         <p class="muted">A small map of the projects that are currently connected.</p>
         <p><a href="/repopulse/">Open the observatory →</a></p>
     </div>
 </section>
+
 @code {
     private GraphModel? _graph;
-    protected override async Task OnInitializedAsync() { _graph = await Data.GetGraphAsync(); }
-    private int GetX(GraphNode n) => n.Id switch { "dx.metadata" => 60, "dx.domain" => 140, "dx.annotations" => 220, "dx.facts" => 100, _ => 180 };
-    private int GetY(GraphNode n) => n.Id switch { "dx.metadata" => 40, "dx.domain" => 70, "dx.annotations" => 40, "dx.facts" => 90, _ => 60 };
+    private IReadOnlyDictionary<string, GraphPoint> _points =
+        new Dictionary<string, GraphPoint>();
+    private bool _loading = true;
+    private bool _failed;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _graph = await Data.GetGraphAsync();
+        _loading = false;
+
+        if (_graph is null)
+        {
+            _failed = true;
+            return;
+        }
+
+        _points = GraphLayout.Create(_graph.Nodes);
+    }
+
+    private static RenderFragment RenderLabel(GraphNode node, GraphPoint point) =>
+        builder =>
+        {
+            var anchor = point.X switch
+            {
+                < 100 => "start",
+                > 220 => "end",
+                _ => "middle"
+            };
+
+            builder.OpenElement(0, "text");
+            builder.AddAttribute(1, "x", point.X);
+            builder.AddAttribute(2, "y", point.Y + 14);
+            builder.AddAttribute(3, "text-anchor", anchor);
+            builder.AddAttribute(4, "font-size", "9");
+            builder.AddAttribute(5, "fill", "#334155");
+            builder.AddContent(6, node.Label);
+            builder.CloseElement();
+        };
 }

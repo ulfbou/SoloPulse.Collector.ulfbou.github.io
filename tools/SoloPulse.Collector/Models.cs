@@ -121,3 +121,16 @@ record BlobContent(string? Text);
 
 /// <summary>Flattened commit used across all metric calculations.</summary>
 record RepoCommit(string RepoName, DateTime CommittedAt, string Message);
+
+record MetricsFile(string SchemaVersion,string GeneratedAt,PeriodInfo Period,SummaryInfo Summary,List<BuildLogEntry> BuildLog,List<AttentionEntry> Attention);
+record PeriodInfo(string Kind,string IsoWeek,string From,string To);
+record SummaryInfo(string PrimaryRepo,int ActiveRepos,int OpenLoops,int StalePullRequests);
+record BuildLogEntry(string Repo,string Label,string RepoLabel,string Summary,string? Detail,string Href,string Status);
+record AttentionEntry(string Kind,string Repo,string Text,string Severity);
+record NowFile(string SchemaVersion,string GeneratedAt,OwnerInfo Owner,SiteInfo Site,CurrentFocus CurrentFocus,PulseInfo Pulse,Signals Signals);
+record OwnerInfo(string Name,string Github,string Location);
+record SiteInfo(string Title,string Mode);
+record CurrentFocus(string Summary,string PrimaryRepo,List<string> SecondaryRepos);
+record PulseInfo(string CurrentWeek,string FriendlyMarkdown,string TechnicalMetrics);
+record Signals(int ActiveRepos,int OpenLoops,int StalePullRequests,int QuietRepos);
+record CollectorOutput(ReposFile Repos,GraphFile Graph,RhythmFile Rhythm,MetricsFile Metrics,NowFile Now,string WeeklyFriendlyMarkdown);

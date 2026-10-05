@@ -1,0 +1,47 @@
+@inject SiteDataClient Data
+
+<section aria-labelledby="build-log">
+    <h2 id="build-log">Build log</h2>
+
+    @if (_loading)
+    {
+        <p>Loading build log…</p>
+    }
+    else if (_failed)
+    {
+        <p>The build log is temporarily unavailable.</p>
+    }
+    else if (_items.Count == 0)
+    {
+        <p>No repository activity was recorded for this period.</p>
+    }
+    else
+    {
+        <ul class="build-log">
+            @foreach (var item in _items)
+            {
+                <li><a href="@item.Href">@item.Label</a>: @item.Summary</li>
+            }
+        </ul>
+    }
+</section>
+
+@code {
+    private readonly List<BuildLogItem> _items = [];
+    private bool _loading = true;
+    private bool _failed;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var metrics = await Data.GetMetricsAsync();
+        _loading = false;
+
+        if (metrics is null)
+        {
+            _failed = true;
+            return;
+        }
+
+        _items.AddRange(metrics.BuildLog);
+    }
+}

@@ -8,4 +8,4 @@
         <p>Built with .NET 10 Blazor WebAssembly</p>
     </div>
 </footer>
-@code { private DateTime? _generatedAt; protected override async Task OnInitializedAsync() { var now = await Data.GetNowAsync(); _generatedAt = now?.GeneratedAtUtc; } }
+@code { private DateTime? _generatedAt; protected override async Task OnInitializedAsync() { var now = await Data.GetNowAsync(); _generatedAt = now?.GeneratedAt; } }

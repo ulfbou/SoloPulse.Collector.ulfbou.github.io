@@ -103,8 +103,8 @@ try
 
     // ─── Build output ─────────────────────────────────────────────────────────
 
-    int medianMomentum = repos.Count > 0
-        ? momentum.Values.OrderBy(v => v).ElementAt(momentum.Count / 2)
+    int medianMomentum = momentum.Count > 0
+        ? momentum.Values.OrderBy(value => value).ElementAt(momentum.Count / 2)
         : 0;
 
     var repoEntries = repos.Select(r =>
@@ -175,23 +175,16 @@ try
         .Take(MaxPublicGraphEdges)
         .ToList();
 
-    // ─── Write files ──────────────────────────────────────────────────────────
-
-    var reposFile = new ReposFile("1", generatedAt, publicRepos);
-    var graphFile = new GraphFile("1", generatedAt, publicNodes, publicEdges);
-    var rhythmFile = new RhythmFile(
-        SchemaVersion:      "1",
-        GeneratedAt:        generatedAt,
-        PeakHours:          peakHours,
-        AvgSessionMinutes:  avgSessionMinutes,
-        FragmentationIndex: fragmentationIndex,
-        DeepWorkStreakDays: streakDays,
-        LastQuietPeriod:    lastQuietPeriod);
-
-    await WriteJsonAsync(Path.Combine(outputDir, "repos.json"),  reposFile,  jsonOptions);
-    await WriteJsonAsync(Path.Combine(outputDir, "graph.json"),  graphFile,  jsonOptions);
-    await WriteJsonAsync(Path.Combine(outputDir, "rhythm.json"), rhythmFile, jsonOptions);
-
+    // ─── Write every static-data artifact from one result ──────────────────
+    var rhythmFile = new RhythmFile("1", generatedAt, peakHours, avgSessionMinutes, fragmentationIndex, streakDays, lastQuietPeriod);
+    var output = OutputBuilder.Build(generatedAt, publicRepos, publicNodes, publicEdges, rhythmFile);
+    var siteRoot = Directory.GetParent(outputDir)!.FullName;
+    await WriteJsonAsync(Path.Combine(outputDir, "repos.json"), output.Repos, jsonOptions);
+    await WriteJsonAsync(Path.Combine(outputDir, "graph.json"), output.Graph, jsonOptions);
+    await WriteJsonAsync(Path.Combine(outputDir, "rhythm.json"), output.Rhythm, jsonOptions);
+    await WriteJsonAsync(Path.Combine(outputDir, "metrics.json"), output.Metrics, jsonOptions);
+    await WriteJsonAsync(Path.Combine(siteRoot, "now.json"), output.Now, jsonOptions);
+    await WriteTextAsync(Path.Combine(siteRoot, "pulse", "weekly-friendly.md"), output.WeeklyFriendlyMarkdown);
     int totalFocusMinutes = publicRepos.Sum(r => r.FocusMinutes7d);
     Console.WriteLine(
         $"Collected {publicRepos.Count} public repos, {publicEdges.Count} public edges, " +
@@ -202,28 +195,24 @@ try
 catch (Exception ex)
 {
     Console.Error.WriteLine($"Fatal error: {ex.Message}");
-
-    // Write valid but empty output so the Blazor site does not get a 404.
-    var empty = new ReposFile("1", generatedAt, []);
-    var emptyGraph = new GraphFile("1", generatedAt, [], []);
-    var emptyRhythm = new RhythmFile("1", generatedAt, [], 0, 0.0, 0, null);
-
-    await WriteJsonAsync(Path.Combine(outputDir, "repos.json"),  empty,        jsonOptions);
-    await WriteJsonAsync(Path.Combine(outputDir, "graph.json"),  emptyGraph,   jsonOptions);
-    await WriteJsonAsync(Path.Combine(outputDir, "rhythm.json"), emptyRhythm,  jsonOptions);
-
-    return 0; // Exit 0 so GitHub Actions does not fail the whole job on empty data.
+    return 1;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 static async Task WriteJsonAsync<T>(string path, T value, JsonSerializerOptions opts)
 {
+    Directory.CreateDirectory(Path.GetDirectoryName(path)!);
     await using var stream = File.Open(path, FileMode.Create, FileAccess.Write);
     await JsonSerializer.SerializeAsync(stream, value, opts);
     await stream.FlushAsync();
 }
 
+static async Task WriteTextAsync(string path,string value)
+{
+    Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+    await File.WriteAllTextAsync(path,value);
+}
 /// <summary>
 /// Walks up the directory tree starting from the binary location to find the
 /// solution root (the directory that contains src/Ulfbou.Site).  Falls back to

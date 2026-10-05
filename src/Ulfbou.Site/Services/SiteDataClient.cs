@@ -26,7 +26,7 @@ public class SiteDataClient
 
     public async Task<List<RepoModel>?> GetReposAsync()
     {
-        try { return await _http.GetFromJsonAsync<List<RepoModel>>("data/repos.json"); }
+        try { var document = await _http.GetFromJsonAsync<ReposDocument>("data/repos.json"); return document?.Repos.Select(RepoMapper.Map).ToList(); }
         catch { return null; }
     }
 

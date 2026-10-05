@@ -1,8 +1,7 @@
 # SoloPulse.Collector
 
 A .NET 10 console app that runs in GitHub Actions, queries the GitHub GraphQL API
-for a given user, calculates solo-developer metrics, and writes three static JSON
-files consumed by the Blazor WASM front-end.
+for a given user, calculates solo-developer metrics, and writes the static data files consumed by the Blazor WASM front-end.
 
 ---
 
@@ -11,7 +10,7 @@ files consumed by the Blazor WASM front-end.
 The Blazor site at `src/Ulfbou.Site` is a living logbook with no backend.
 All dynamic data comes from JSON files committed to the repo by a weekly
 GitHub Action that runs this collector.  The collector is the single source
-of truth for `repos.json`, `graph.json`, and `rhythm.json`.
+of truth for `repos.json`, `graph.json`, `rhythm.json`, `metrics.json`, `now.json`, and `pulse/weekly-friendly.md`.
 
 ---
 
@@ -57,8 +56,9 @@ Collected 8 repos, 12 edges, 340 minutes focus, written to "…/src/Ulfbou.Site/
 
 ## Output files
 
-All files are written to `src/Ulfbou.Site/wwwroot/data/` and include
-`"schemaVersion": "1"` and `"generatedAt"` (UTC ISO 8601).
+JSON data files are written under `src/Ulfbou.Site/wwwroot/data/`; `now.json` and
+`pulse/weekly-friendly.md` are written under `src/Ulfbou.Site/wwwroot/`. JSON outputs
+include `"schemaVersion": "1"` and `"generatedAt"` (UTC ISO 8601).
 
 ### repos.json
 Per-repo solo metrics.  Key fields:

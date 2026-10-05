@@ -1,5 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/Ulfbou.Site/Ulfbou.Site.csproj" />
+    <Project Path="tools/SoloPulse.Collector/SoloPulse.Collector.csproj" />
+    <Project Path="tests/Ulfbou.Tests/Ulfbou.Tests.csproj" />
   </Folder>
 </Solution>

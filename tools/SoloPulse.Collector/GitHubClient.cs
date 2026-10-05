@@ -159,9 +159,8 @@ sealed class GitHubGraphQlClient : IDisposable
                         continue;
                     }
 
-                    Console.Error.WriteLine(
-                        "Rate limit persists after retry — returning empty data.");
-                    return default;
+                    throw new HttpRequestException(
+                        "GitHub rate limit persisted after retry.");
                 }
 
                 response.EnsureSuccessStatusCode();
@@ -170,24 +169,26 @@ sealed class GitHubGraphQlClient : IDisposable
                 var result = JsonSerializer.Deserialize<GraphQlResponse<T>>(json, JsonOpts);
 
                 if (result?.Errors is { Count: > 0 })
-                    foreach (var err in result.Errors)
-                        Console.Error.WriteLine($"GraphQL error: {err.Message}");
+                {
+                    throw new InvalidOperationException(
+                        string.Join("; ", result.Errors.Select(error => error.Message)));
+                }
 
-                return result?.Data;
+                return result?.Data
+                    ?? throw new InvalidOperationException("GitHub returned no data.");
             }
             catch (HttpRequestException ex) when (attempt == 0)
             {
                 Console.Error.WriteLine($"Network error: {ex.Message} — retrying once…");
                 await Task.Delay(TimeSpan.FromSeconds(5), ct);
             }
-            catch (HttpRequestException ex)
+            catch (HttpRequestException)
             {
-                Console.Error.WriteLine($"Network error: {ex.Message} — returning empty data.");
-                return default;
+                throw;
             }
         }
 
-        return default;
+        throw new InvalidOperationException("GitHub request did not complete.");
     }
 
     public void Dispose() => _http.Dispose();

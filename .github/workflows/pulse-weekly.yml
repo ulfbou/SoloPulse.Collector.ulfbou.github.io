@@ -1,53 +1,57 @@
 name: Weekly Pulse
-
 on:
   schedule:
     - cron: "0 23 * * 0"
   workflow_dispatch:
-    inputs:
-      reason:
-        description: "Reason for manual run"
-        required: false
-        default: "manual test"
-
 permissions:
   contents: write
-
 jobs:
   collect:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Setup .NET 10
-        uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "10.0.x"
           include-prerelease: true
-
-      - name: Run Collector
+      - name: Build and test
+        run: |
+          dotnet build Ulfbou.slnx --configuration Release
+          dotnet test Ulfbou.slnx --configuration Release --no-build
+      - name: Run collector
         run: dotnet run --project tools/SoloPulse.Collector --configuration Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TARGET_USER: ulfbou
-
       - name: Verify generated output
         run: |
-          ls -lh src/Ulfbou.Site/wwwroot/data/
-          jq '.schemaVersion' src/Ulfbou.Site/wwwroot/data/repos.json
-          jq '.repos | length' src/Ulfbou.Site/wwwroot/data/repos.json
-          jq '.schemaVersion' src/Ulfbou.Site/wwwroot/data/graph.json
-          jq '.nodes | length' src/Ulfbou.Site/wwwroot/data/graph.json
-          jq '.edges | length' src/Ulfbou.Site/wwwroot/data/graph.json
-
+          python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+          root=Path("src/Ulfbou.Site/wwwroot")
+          paths={"repos":root/"data/repos.json","graph":root/"data/graph.json","rhythm":root/"data/rhythm.json","metrics":root/"data/metrics.json","now":root/"now.json"}
+          docs={name:json.loads(path.read_text()) for name,path in paths.items()}
+          for name,doc in docs.items():
+              assert doc.get("schemaVersion")=="1", paths[name]
+              assert "generatedAt" in doc, paths[name]
+          assert len({doc["generatedAt"] for doc in docs.values()})==1
+          generated=datetime.fromisoformat(docs["repos"]["generatedAt"].replace("Z","+00:00"))
+          age=(datetime.now(timezone.utc)-generated.astimezone(timezone.utc)).total_seconds()
+          assert -300 <= age <= 86400, f"stale generatedAt: {generated}"
+          for name,key in (("repos","repos"),("graph","nodes"),("graph","edges"),("rhythm","peakHours"),("metrics","buildLog"),("metrics","attention")):
+              assert isinstance(docs[name].get(key),list), f"{name}.{key}"
+          repos=docs["repos"]["repos"]; active=sum(r["momentum"]>0 for r in repos); loops=sum(r["openLoops"] for r in repos)
+          assert docs["metrics"]["summary"]["activeRepos"]==docs["now"]["signals"]["activeRepos"]==active
+          assert docs["metrics"]["summary"]["openLoops"]==docs["now"]["signals"]["openLoops"]==loops
+          assert docs["now"]["signals"]["quietRepos"]==len(repos)-active
+          assert (root/"pulse/weekly-friendly.md").read_text().strip()
+          PY
       - name: Commit generated pulse data
         run: |
-          git config user.name "pulse-bot"
-          git config user.email "pulse-bot@users.noreply.github.com"
-          git add src/Ulfbou.Site/wwwroot/data/
-          git diff --staged --quiet || git commit -m "chore: update pulse data [skip ci]"
+          git config user.name pulse-bot
+          git config user.email pulse-bot@users.noreply.github.com
+          git add -- src/Ulfbou.Site/wwwroot/data/repos.json src/Ulfbou.Site/wwwroot/data/graph.json src/Ulfbou.Site/wwwroot/data/rhythm.json src/Ulfbou.Site/wwwroot/data/metrics.json src/Ulfbou.Site/wwwroot/now.json src/Ulfbou.Site/wwwroot/pulse/weekly-friendly.md
+          if git diff --staged --quiet; then exit 0; fi
+          git commit -m "chore: update pulse data [skip ci]"
           git push
