@@ -9,18 +9,34 @@
     }
     else if (_failed)
     {
-        <p>The build log is temporarily unavailable.</p>
+        <p class="muted">
+            Build log is temporarily unavailable. The data file could not be
+            loaded.
+        </p>
     }
     else if (_items.Count == 0)
     {
-        <p>No repository activity was recorded for this period.</p>
+        <p class="muted">
+            No build activity was recorded this week. The log will repopulate
+            with new commits.
+        </p>
     }
     else
     {
         <ul class="build-log">
             @foreach (var item in _items)
             {
-                <li><a href="@item.Href">@item.Label</a>: @item.Summary</li>
+                <li>
+                    <a href="@item.Href">@item.RepoLabel</a>
+                    <span> — @item.Summary</span>
+
+                    @if (!string.IsNullOrWhiteSpace(item.Detail))
+                    {
+                        <span class="muted"> (@item.Detail)</span>
+                    }
+
+                    <span class="meta"> [@item.Status]</span>
+                </li>
             }
         </ul>
     }

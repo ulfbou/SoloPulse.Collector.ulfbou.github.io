@@ -7,13 +7,23 @@ namespace Ulfbou.Tests;
 public sealed class RepoMapperTests
 {
     [Theory]
-    [InlineData(50, 0, "active")]
-    [InlineData(49, 10, "needs-attention")]
-    [InlineData(1, 9, "stable")]
-    [InlineData(0, 9, "quiet")]
+    [InlineData(0, 0, 0, 1.0, "quiet")]
+    [InlineData(14, 0, 0, 1.0, "active")]
+    [InlineData(15, 0, 0, 1.0, "active")]
+    [InlineData(0, 30, 0, 1.0, "active")]
+    [InlineData(0, 0, 10, 1.0, "needs-attention")]
+    [InlineData(0, 0, 9, 1.0, "quiet")]
+    [InlineData(4, 0, 0, 0.5, "needs-attention")]
+    [InlineData(4, 0, 0, 0.6, "active")]
     public void MapStatus_UsesDefinedBoundaries(
         int momentum,
+        int focusMinutes7d,
         int openLoops,
+        double returnRate,
         string expected) =>
-        RepoMapper.MapStatus(momentum, openLoops).Should().Be(expected);
+        RepoMapper.MapStatus(
+            momentum,
+            focusMinutes7d,
+            openLoops,
+            returnRate).Should().Be(expected);
 }

@@ -7,24 +7,55 @@ namespace Ulfbou.Tests;
 
 public sealed class GraphLayoutTests
 {
-    [Theory]
-    [InlineData(0)]
-    [InlineData(1)]
-    [InlineData(5)]
-    [InlineData(8)]
-    public void Create_IsDeterministicAndInsideTheViewBox(int count)
+    [Fact]
+    public void ComputeViewBox_UsesDefaultForZeroNodes()
     {
-        var nodes = Enumerable.Range(0, count)
-            .Select(index => new GraphNode { Id = $"repo-{index}" })
+        GraphLayout.ComputeViewBox(0).Should().Be("0 0 300 120");
+    }
+
+    [Fact]
+    public void ComputePosition_IsDeterministicForOneNode()
+    {
+        GraphLayout.ComputePosition(0).Should().Be(new GraphPoint(24, 24));
+        GraphLayout.ComputePosition(0)
+            .Should().Be(GraphLayout.ComputePosition(0));
+    }
+
+    [Fact]
+    public void FiveNodes_FitInOneRow()
+    {
+        var positions = Enumerable.Range(0, 5)
+            .Select(GraphLayout.ComputePosition)
             .ToList();
 
-        var forward = GraphLayout.Create(nodes);
-        var reversed = GraphLayout.Create(nodes.AsEnumerable().Reverse());
+        positions.Should().OnlyContain(point => point.Y == 24);
+        positions[0].X.Should().Be(24);
+        positions[4].X.Should().Be(264);
+        GraphLayout.ComputeViewBox(5).Should().Be("0 0 340 120");
+    }
 
-        forward.Should().BeEquivalentTo(reversed);
-        forward.Should().HaveCount(count);
-        forward.Values.Should().OnlyContain(point =>
-            point.X >= 50 && point.X <= 270
-            && point.Y >= 25 && point.Y <= 115);
+    [Fact]
+    public void MoreThanFiveNodes_WrapToAnotherRow()
+    {
+        GraphLayout.ComputePosition(5).Should().Be(new GraphPoint(24, 58));
+    }
+
+    [Fact]
+    public void FifteenNodes_GrowTheViewBox()
+    {
+        GraphLayout.ComputeViewBox(15).Should().Be("0 0 340 152");
+    }
+
+    [Fact]
+    public void Create_IsIndependentOfInputOrder()
+    {
+        var nodes = Enumerable.Range(0, 15)
+            .Select(index => new GraphNode { Id = $"repo-{index:D2}" })
+            .ToList();
+
+        GraphLayout.Create(nodes)
+            .Should()
+            .BeEquivalentTo(
+                GraphLayout.Create(nodes.AsEnumerable().Reverse()));
     }
 }

@@ -35,4 +35,6 @@ public sealed class RepoModel
     public string Summary { get; set; } = "";
     public string Status { get; set; } = "";
     public string GithubUrl { get; set; } = "";
+    public string DocsUrl { get; set; } = "";
+    public int ActivityScore { get; set; }
 }

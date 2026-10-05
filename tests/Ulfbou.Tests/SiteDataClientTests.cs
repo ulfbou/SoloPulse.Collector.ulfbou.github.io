@@ -29,7 +29,7 @@ public sealed class SiteDataClientTests
             ReturnRate = 0.75,
             OpenLoops = 3,
             Summary = "Summary",
-            Status = "stable",
+            Status = "active",
             GithubUrl = "https://github.com/ulfbou/repo"
         }, options => options.ExcludingMissingMembers());
         repo.LastDeepWork.Should().Be(DateTime.Parse("2026-10-05T08:00:00Z").ToUniversalTime());

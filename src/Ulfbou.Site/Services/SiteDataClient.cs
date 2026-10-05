@@ -36,6 +36,19 @@ public class SiteDataClient
         catch { return null; }
     }
 
+    public async Task<RhythmModel?> GetRhythmAsync()
+    {
+        try
+        {
+            return await _http.GetFromJsonAsync<RhythmModel>(
+                "data/rhythm.json");
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     public async Task<string?> GetWeeklyMarkdownAsync(string path)
     {
         try { return await _http.GetStringAsync(path.TrimStart('/')); }

@@ -16,7 +16,30 @@ static class OutputBuilder
         var now=new NowFile("1",generatedAt,new("Ulf Bourelius","ulfbou","Stockholm"),new("ulfbou.github.io","living-logbook"),new(primary is null?"No repository activity was collected this week.":$"Current work is gathering around {primary.DisplayName}.",primaryName,repos.Where(r=>r.Name!=primaryName).Take(2).Select(r=>r.Name).ToList()),new(isoWeek,"/pulse/weekly-friendly.md","/data/metrics.json"),new(active,loops,0,repos.Count-active));
         return new(new("1",generatedAt,repos),new("1",generatedAt,nodes,edges),rhythm,metrics,now,Markdown(isoWeek,repos,primary));
     }
-    internal static string Status(RepoEntry r)=>r.Momentum>=50?"active":r.OpenLoops>=10?"needs-attention":r.Momentum>0?"stable":"quiet";
+    internal static string Status(RepoEntry repo)
+    {
+        if (repo.Momentum >= 15 || repo.FocusMinutes7d >= 30)
+        {
+            return "active";
+        }
+
+        if (repo.OpenLoops >= 10)
+        {
+            return "needs-attention";
+        }
+
+        if (repo.Momentum == 0 && repo.FocusMinutes7d == 0)
+        {
+            return "quiet";
+        }
+
+        if (repo.ReturnRate < 0.6 && repo.Momentum < 5)
+        {
+            return "needs-attention";
+        }
+
+        return "active";
+    }
     static string Summary(RepoEntry r)=>Status(r) switch{"active"=>string.IsNullOrWhiteSpace(r.Summary)?"Active work is visible here this week.":r.Summary,"needs-attention"=>$"{r.OpenLoops} open loops are waiting for attention.","stable"=>"Steady background work is visible here.",_=>"Quiet this week."};
     static string Markdown(string week,List<RepoEntry> repos,RepoEntry? primary)
     {

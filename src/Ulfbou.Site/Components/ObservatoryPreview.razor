@@ -9,36 +9,52 @@
         }
         else if (_failed)
         {
-            <p>The repository map is temporarily unavailable.</p>
+            <p class="muted">The repository map is temporarily unavailable.</p>
         }
         else if (_graph!.Nodes.Count == 0)
         {
-            <p>No repository connections are available yet.</p>
+            <p class="muted">
+                No connections are mapped yet. The observatory will populate
+                once repositories are collected.
+            </p>
         }
         else
         {
-            <svg viewBox="0 0 320 150" role="img" aria-label="Repository constellation preview">
+            <svg viewBox="@_viewBox"
+                 role="img"
+                 aria-label="Repository constellation preview"
+                 style="width:100%;height:auto;">
                 @foreach (var edge in _graph.Edges)
                 {
                     if (_points.TryGetValue(edge.Source, out var source)
                         && _points.TryGetValue(edge.Target, out var target))
                     {
-                        <line x1="@source.X" y1="@source.Y"
-                              x2="@target.X" y2="@target.Y"
-                              stroke="#cbd5e1" stroke-width="1" />
+                        <line x1="@source.X"
+                              y1="@source.Y"
+                              x2="@target.X"
+                              y2="@target.Y"
+                              stroke="#cbd5e1"
+                              stroke-width="1" />
                     }
                 }
 
                 @foreach (var node in _graph.Nodes)
                 {
                     var point = _points[node.Id];
-                    <circle cx="@point.X" cy="@point.Y" r="4" fill="#0f172a" />
+
+                    <circle cx="@point.X"
+                            cy="@point.Y"
+                            r="4"
+                            fill="#0f172a" />
+
                     @RenderLabel(node, point)
                 }
             </svg>
         }
 
-        <p class="muted">A small map of the projects that are currently connected.</p>
+        <p class="muted">
+            A small map of the projects that are currently connected.
+        </p>
         <p><a href="/repopulse/">Open the observatory →</a></p>
     </div>
 </section>
@@ -47,6 +63,7 @@
     private GraphModel? _graph;
     private IReadOnlyDictionary<string, GraphPoint> _points =
         new Dictionary<string, GraphPoint>();
+    private string _viewBox = GraphLayout.ComputeViewBox(0);
     private bool _loading = true;
     private bool _failed;
 
@@ -62,25 +79,20 @@
         }
 
         _points = GraphLayout.Create(_graph.Nodes);
+        _viewBox = GraphLayout.ComputeViewBox(_graph.Nodes.Count);
     }
 
-    private static RenderFragment RenderLabel(GraphNode node, GraphPoint point) =>
+    private static RenderFragment RenderLabel(
+        GraphNode node,
+        GraphPoint point) =>
         builder =>
         {
-            var anchor = point.X switch
-            {
-                < 100 => "start",
-                > 220 => "end",
-                _ => "middle"
-            };
-
             builder.OpenElement(0, "text");
-            builder.AddAttribute(1, "x", point.X);
-            builder.AddAttribute(2, "y", point.Y + 14);
-            builder.AddAttribute(3, "text-anchor", anchor);
-            builder.AddAttribute(4, "font-size", "9");
-            builder.AddAttribute(5, "fill", "#334155");
-            builder.AddContent(6, node.Label);
+            builder.AddAttribute(1, "x", point.X + 8);
+            builder.AddAttribute(2, "y", point.Y + 4);
+            builder.AddAttribute(3, "font-size", "9");
+            builder.AddAttribute(4, "fill", "#334155");
+            builder.AddContent(5, node.Label);
             builder.CloseElement();
         };
 }
